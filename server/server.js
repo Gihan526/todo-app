@@ -25,10 +25,9 @@ app.post("/registeruser", async (req, res) => {
   }
 });
 
-
 app.post("/addtask", async (req, res) => {
   try {
-    const { user_id,title,description,status,due_data } = req.body;
+    const { user_id, title, description, status, due_data } = req.body;
 
     const response = await fetch("http://localhost:4000/addtask", {
       method: "POST",
@@ -43,12 +42,21 @@ app.post("/addtask", async (req, res) => {
   }
 });
 
+app.delete("/del", async (req, res) => {
+  try {
+    const { user_id, todo_id } = req.body;
 
+    const response = await fetch(`http://localhost:4000/deletetask/${user_id}/${todo_id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
 
-
-
-
-
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 // Start server
