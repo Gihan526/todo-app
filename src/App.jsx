@@ -1,6 +1,5 @@
 import { useState } from "react";
 import RegisterUserForm from "./RegisterUserForm";
-import "./styles/App.css";
 import CreateTodoForm from "./CreateTodoForm";
 import ViewTasks from "./ViewTasks";
 
