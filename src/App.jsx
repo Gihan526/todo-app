@@ -30,17 +30,17 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 ">
       <nav>
         <h1>Todo App</h1>
-        <ul>
-          <li onClick={() => setActiveTab("register")}>Register</li>
-          <li onClick={() => setActiveTab("todo")}>Create Todo</li>
-          <li onClick={() => setActiveTab("view")}>View Tasks</li>
+        <ul className="flex justify-center space-x-6 border border-gray-300 rounded px-6 py-3 mx-auto w-96">
+          <li onClick={() => setActiveTab("register")} className="cursor-pointer hover:text-blue-600">Register</li>
+          <li onClick={() => setActiveTab("todo")} className="cursor-pointer hover:text-blue-600">Create Todo</li>
+          <li onClick={() => setActiveTab("view")} className="cursor-pointer hover:text-blue-600">View Tasks</li>
         </ul>
       </nav>
 
-      <div>
+      <div className="flex justify-center mt-11 ">
         {activeTab === "register" && <RegisterUserForm />}
         {activeTab === "todo" && <CreateTodoForm onAdd={addTodoToList} />}
         {activeTab === "view" && (
