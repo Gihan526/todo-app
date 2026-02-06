@@ -74,39 +74,44 @@ function CreateTodoForm(props) {
 
   return (
     <div>
-      <h1>Create Todo</h1>
-      <form onSubmit={handleSubmit}>
+      <h1 className="text-center mb-5">Create Todo</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 border rounded p-13">
         <input
           name="userid"
           onChange={handleInputChange}
           value={todoFormData.userid}
           placeholder="User ID"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="title"
           onChange={handleInputChange}
           value={todoFormData.title}
           placeholder="Title"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="description"
           onChange={handleInputChange}
           value={todoFormData.description}
           placeholder="Description"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="status"
           onChange={handleInputChange}
           value={todoFormData.status}
           placeholder="Status"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="due_data"
           onChange={handleInputChange}
           value={todoFormData.due_data}
           placeholder="Due Date"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">Create Task</button>
+        <button type="submit" className="border p-1.5  cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Create Task</button>
       </form>
       {error && <p style={{color: 'red'}}>{error}</p>}
     </div>

@@ -37,17 +37,18 @@ function RegisterUserForm() {
 
   return (
     <div>
-      <h1>Register User</h1>
+      <h1 className="text-center text-lg pt-5 mb-5">Register User</h1>
       {userFormData.id && (
-        <p>Hello {userFormData.name}, ID: {userFormData.id}, registered successfully!</p>
+        <p className="text-center mt-5">Hello {userFormData.name}, ID: {userFormData.id}, registered successfully!</p>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md mx-auto border rounded p-13">
         <input
           name="name"
           onChange={handleInputChange}
           value={userFormData.name}
           placeholder="Name"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -55,11 +56,14 @@ function RegisterUserForm() {
           onChange={handleInputChange}
           value={userFormData.email}
           placeholder="Email"
+          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <button type="submit">Register</button>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+          Register
+        </button>
       </form>
-      {error && <p style={{color: 'red'}}>{error}</p>}
+      {error && <p className="text-red-600 text-center mt-4">{error}</p>}
     </div>
   );
 }
