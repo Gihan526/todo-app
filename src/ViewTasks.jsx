@@ -163,8 +163,8 @@ function ViewTasks(props) {
   const displayTasks = userId ? userTasks : props.todoList;
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <h2 className="text-center text-lg mb-5">Todo List</h2>
+    <div className="max-w-2xl mx-auto ">
+      <h2 className="text-center text-lg mb-5 ">Todo List</h2>
       <div className="flex gap-4 mb-10">
         <input
           type="text"
@@ -251,9 +251,9 @@ function ViewTasks(props) {
                     </button>
                   </div>
                 </form>
-              </div>
+              </div>     
             ) : (
-              <div className="border border-gray-300 rounded p-4 bg-white mb-4">
+              <div className="sm:border border-gray-300 rounded sm:p-4 bg-white sm:mb-4 border sm:w-xl  p-4 mb-4 w-90 m-auto">
                 <h3 className="text-base font-semibold text-gray-900 mb-2">
                   {todoItem.title}
                 </h3>
