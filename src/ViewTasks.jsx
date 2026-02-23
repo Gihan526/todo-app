@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { authFetch } from "./authFetch";
 
 function ViewTasks(props) {
   const getStatusColor = (status) => {
@@ -15,7 +16,6 @@ function ViewTasks(props) {
   };
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [userId, setUserId] = useState("");
   const [userTasks, setUserTasks] = useState([]);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -25,6 +25,10 @@ function ViewTasks(props) {
     todoid: null,
     userid: null,
   });
+
+  useEffect(() => {
+    fetchUserTasks();
+  }, []);
 
   const handleDelete = async (todoid, userid) => {
     const taskId = todoid;
@@ -37,7 +41,7 @@ function ViewTasks(props) {
     }
     
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:4000/deletetask/${userid}/${todoid}`,
         {
           method: "DELETE",
@@ -54,7 +58,8 @@ function ViewTasks(props) {
 
       console.log("Task deleted successfully:", data);
 
-      props.onDelete(todoid);
+      // Refresh task list
+      fetchUserTasks();
       setError("");
     } catch (error) {
       setError("Delete failed");
@@ -97,11 +102,13 @@ function ViewTasks(props) {
     }
     
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:4000/updatetasks/${userid}/${todoid}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
             title: editForm.title,
             description: editForm.description,
@@ -120,7 +127,8 @@ function ViewTasks(props) {
 
       console.log("Task updated successfully:", data);
 
-      props.onUpdate(todoid, editForm);
+      // Refresh task list
+      fetchUserTasks();
       setEditingId(null);
       setEditForm({ title: "", description: "", status: "", due_data: "", todoid: null, userid: null });
       setError("");
@@ -131,13 +139,8 @@ function ViewTasks(props) {
   };
 
   const fetchUserTasks = async () => {
-    if (!userId) {
-      setUserTasks([]);
-      return;
-    }
-
     try {
-      const response = await fetch(`http://localhost:4000/alltasks/${userId}`);
+      const response = await authFetch(`http://localhost:4000/mytasks`);
       const data = await response.json();
 
       if (response.ok && data.tasks) {
@@ -160,32 +163,15 @@ function ViewTasks(props) {
     }
   };
 
-  const displayTasks = userId ? userTasks : props.todoList;
-
   return (
     <div className="max-w-2xl mx-auto ">
       <h2 className="text-center text-lg mb-5 ">Todo List</h2>
-      <div className="flex gap-4 mb-10">
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="Enter User ID to view tasks"
-          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
-        />
-        <button
-          onClick={fetchUserTasks}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Load Tasks
-        </button>
-      </div>
 
       {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-      {displayTasks.length === 0 ? (
+      {userTasks.length === 0 ? (
         <p className="text-center text-gray-600">No tasks yet. Create one!</p>
       ) : (
-        displayTasks.map((todoItem) => {
+        userTasks.map((todoItem) => {
           const taskId = todoItem.todoid || todoItem.id;
           const userId = todoItem.userid || todoItem.user_id;
           

@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Routes, Route, Link } from "react-router-dom";
 import RegisterUserForm from "./RegisterUserForm";
 import CreateTodoForm from "./CreateTodoForm";
 import ViewTasks from "./ViewTasks";
+import LoginPage from "./LoginPage";
 
 function App() {
-  const [activeTab, setActiveTab] = useState("register");
   const [todoList, setTodoList] = useState([]);
 
   function addTodoToList(newTodo) {
@@ -32,37 +33,43 @@ function App() {
       <nav className="max-w-fit mx-auto">
         <h1 className="text-center text-3xl font-bold pt-5">Taskly</h1>
         <ul className="justify-center border border-zinc-250 px-5 flex  space-x-6 mt-5 rounded py-2">
-          <li
-            onClick={() => setActiveTab("register")}
-            className="cursor-pointer hover:text-blue-600"
-          >
-            Register
+          <li>
+            <Link to="/register" className="cursor-pointer hover:text-blue-600">
+              Register
+            </Link>
           </li>
-          <li
-            onClick={() => setActiveTab("todo")}
-            className="cursor-pointer hover:text-blue-600"
-          >
-            Create Todo
+          <li>
+            <Link to="/login" className="cursor-pointer hover:text-blue-600">
+              Login
+            </Link>
           </li>
-          <li
-            onClick={() => setActiveTab("view")}
-            className="cursor-pointer hover:text-blue-600"
-          >
-            View Tasks
+          <li>
+            <Link to="/todo" className="cursor-pointer hover:text-blue-600">
+              Create Todo
+            </Link>
+          </li>
+          <li>
+            <Link to="/tasks" className="cursor-pointer hover:text-blue-600">
+              View Tasks
+            </Link>
           </li>
         </ul>
       </nav>
 
       <div className="flex justify-center mt-11 ">
-        {activeTab === "register" && <RegisterUserForm />}
-        {activeTab === "todo" && <CreateTodoForm onAdd={addTodoToList} />}
-        {activeTab === "view" && (
-          <ViewTasks
-            todoList={todoList}
-            onDelete={deleteToList}
-            onUpdate={updateTodoInList}
-          />
-        )}
+        <Routes>
+          <Route path="/register" element={<RegisterUserForm />} />
+          <Route path="/todo" element={<CreateTodoForm onAdd={addTodoToList} />} />
+          <Route path="/tasks" element={
+            <ViewTasks
+              todoList={todoList}
+              onDelete={deleteToList}
+              onUpdate={updateTodoInList}
+            />
+          } />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<RegisterUserForm />} />
+        </Routes>
       </div>
     </div>
   );

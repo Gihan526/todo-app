@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authFetch } from "./authFetch";
 
 function CreateTodoForm(props) {
+  const navigate = useNavigate();
   const [todoFormData, setTodoFormData] = useState({
     userid: "",
     title: "",
@@ -25,9 +28,11 @@ function CreateTodoForm(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/addtask", {
+      const response = await authFetch("http://localhost:4000/addtask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           user_id: todoFormData.userid,
           title: todoFormData.title,
@@ -66,6 +71,7 @@ function CreateTodoForm(props) {
       
       setError(""); 
       console.log("Task created successfully:", data);
+      navigate("/tasks");
     } catch (error) {
       setError("Task creation failed");
       console.error(error);
@@ -80,7 +86,7 @@ function CreateTodoForm(props) {
           name="userid"
           onChange={handleInputChange}
           value={todoFormData.userid}
-          placeholder="User ID"
+          placeholder="Name"
           className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input

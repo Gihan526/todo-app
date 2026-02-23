@@ -1,22 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function RegisterUserForm() {
+function LoginPage(props) {
   const navigate = useNavigate();
-  const [userFormData, setUserFormData] = useState({
+  const [loginFormData, setLoginFormData] = useState({
     name: "",
-    email: "",
-    id: "",
     password: "",
   });
-
- 
-
   const [error, setError] = useState("");
 
-  const handleInputChange = (event) => {
+  const handleLoginChange = (event) => {
     const { name, value } = event.target;
-    setUserFormData((prevValue) => {
+    setLoginFormData((prevValue) => {
       return {
         ...prevValue,
         [name]: value,
@@ -24,76 +19,66 @@ function RegisterUserForm() {
     });
   };
 
-  const handleSubmit = async (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/auth/register", {
+      const response = await fetch("http://localhost:4000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          name: userFormData.name,
-          email: userFormData.email,
-          password: userFormData.password,
+          name: loginFormData.name,
+          password: loginFormData.password,
         }),
       });
       const data = await response.json();
-      setUserFormData((prevValue) => ({
-        ...prevValue,
-        id: data.user.id,
-      }));
       
-      console.log("Registration successful:", data);
-      navigate("/todo");
+      if (!response.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
+      
+      console.log("Login successful:", data);
+      navigate("/tasks");
     } catch (error) {
-      setError("Registration failed");
+      setError("Login failed");
       console.error(error);
     }
   };
 
   return (
     <div>
-      <h1 className="text-center text-lg pt-5 mb-5">Register User</h1>
-      {userFormData.id && (
-        <p className="text-center mt-5">
-          Hello {userFormData.name}, ID: {userFormData.id}, registered
-          successfully!
-        </p>
-      )}
+      <h1 className="text-center text-lg pt-5 mb-5">Login</h1>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleLogin}
         className="flex flex-col gap-4 w-full max-w-md mx-auto border rounded p-13"
       >
         <input
+          type="text"
           name="name"
-          onChange={handleInputChange}
-          value={userFormData.name}
+          value={loginFormData.name}
+          onChange={handleLoginChange}
           placeholder="Name"
           className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
 
         <input
-          name="email"
-          onChange={handleInputChange}
-          value={userFormData.email}
-          placeholder="Email"
-          className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <input
+          type="password"
           name="password"
-          onChange={handleInputChange}
-          value={userFormData.password}
+          value={loginFormData.password}
+          onChange={handleLoginChange}
           placeholder="Password"
           className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
 
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
-          Register
+          Login
         </button>
       </form>
       {error && <p className="text-red-600 text-center mt-4">{error}</p>}
@@ -101,4 +86,4 @@ function RegisterUserForm() {
   );
 }
 
-export default RegisterUserForm;
+export default LoginPage;
