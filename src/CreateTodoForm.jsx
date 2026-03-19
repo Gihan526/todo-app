@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authFetch } from "./authFetch";
+import { authFetch, buildApiUrl } from "./authFetch";
 
 function CreateTodoForm(props) {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ function CreateTodoForm(props) {
     title: "",
     description: "",
     status: "",
-    due_data: "",
+    due_date: "",
     todoid: "",
   });
 
@@ -28,48 +28,45 @@ function CreateTodoForm(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await authFetch("http://localhost:4000/addtask", {
+      const response = await authFetch(buildApiUrl("/addtask"), {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
+        headers: {
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           user_id: todoFormData.userid,
           title: todoFormData.title,
           description: todoFormData.description,
           status: todoFormData.status,
-          due_data: todoFormData.due_data,
+          due_date: todoFormData.due_date,
         }),
       });
       const data = await response.json();
-      
-      // Check if the response was successful
+
       if (!response.ok || !data.todo) {
         setError(data.error || "Task creation failed");
         console.error("API Error:", data);
         return;
       }
-      
+
       const createdTodo = {
         ...todoFormData,
         todoid: data.todo.id,
         userid: data.todo.user_id,
       };
-      
-      // Add to parent component's state
+
       props.onAdd(createdTodo);
-      
-      // Reset form
+
       setTodoFormData({
         userid: "",
         title: "",
         description: "",
         status: "",
-        due_data: "",
+        due_date: "",
         todoid: "",
       });
-      
-      setError(""); 
+
+      setError("");
       console.log("Task created successfully:", data);
       navigate("/tasks");
     } catch (error) {
@@ -111,15 +108,20 @@ function CreateTodoForm(props) {
           className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
-          name="due_data"
+          name="due_date"
           onChange={handleInputChange}
-          value={todoFormData.due_data}
+          value={todoFormData.due_date}
           placeholder="Due Date"
           className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit" className="border p-1.5  cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Create Task</button>
+        <button
+          type="submit"
+          className="border p-1.5  cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Create Task
+        </button>
       </form>
-      {error && <p style={{color: 'red'}}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }

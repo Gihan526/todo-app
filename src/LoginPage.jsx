@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildApiUrl } from "./authFetch";
 
 function LoginPage(props) {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ function LoginPage(props) {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/auth/login", {
+      const response = await fetch(buildApiUrl("/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -32,12 +33,12 @@ function LoginPage(props) {
         }),
       });
       const data = await response.json();
-      
+
       if (!response.ok) {
         setError(data.error || "Login failed");
         return;
       }
-      
+
       console.log("Login successful:", data);
       navigate("/tasks");
     } catch (error) {

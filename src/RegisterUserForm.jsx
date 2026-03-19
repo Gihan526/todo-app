@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildApiUrl } from "./authFetch";
 
 function RegisterUserForm() {
   const navigate = useNavigate();
@@ -9,9 +10,6 @@ function RegisterUserForm() {
     id: "",
     password: "",
   });
-
- 
-
   const [error, setError] = useState("");
 
   const handleInputChange = (event) => {
@@ -27,7 +25,7 @@ function RegisterUserForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/auth/register", {
+      const response = await fetch(buildApiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -38,12 +36,19 @@ function RegisterUserForm() {
         }),
       });
       const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Registration failed");
+        return;
+      }
+
       setUserFormData((prevValue) => ({
         ...prevValue,
-        id: data.user.id,
+        id: data.user?.id || "",
       }));
-      
+
       console.log("Registration successful:", data);
+      setError("");
       navigate("/todo");
     } catch (error) {
       setError("Registration failed");

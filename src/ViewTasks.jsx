@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { authFetch } from "./authFetch";
+import { authFetch, buildApiUrl } from "./authFetch";
 
 function ViewTasks(props) {
   const getStatusColor = (status) => {
@@ -21,7 +21,7 @@ function ViewTasks(props) {
     title: "",
     description: "",
     status: "",
-    due_data: "",
+    due_date: "",
     todoid: null,
     userid: null,
   });
@@ -33,16 +33,16 @@ function ViewTasks(props) {
   const handleDelete = async (todoid, userid) => {
     const taskId = todoid;
     const userId = userid;
-    
+
     if (!taskId || !userId) {
       setError("Invalid task ID or user ID");
       console.error("Delete failed - missing IDs:", { taskId, userId });
       return;
     }
-    
+
     try {
       const response = await authFetch(
-        `http://localhost:4000/deletetask/${userid}/${todoid}`,
+        buildApiUrl(`/deletetask/${userid}/${todoid}`),
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -58,7 +58,6 @@ function ViewTasks(props) {
 
       console.log("Task deleted successfully:", data);
 
-      // Refresh task list
       fetchUserTasks();
       setError("");
     } catch (error) {
@@ -68,10 +67,10 @@ function ViewTasks(props) {
   };
 
   const handleEdit = (todoItem) => {
-    console.log("Editing task:", todoItem); // Debug log
+    console.log("Editing task:", todoItem);
     const taskId = todoItem.todoid || todoItem.id;
     const userId = todoItem.userid || todoItem.user_id;
-    
+
     if (!taskId || !userId) {
       setError("Invalid task ID or user ID - cannot edit");
       console.error("Missing IDs:", { taskId, userId, todoItem });
@@ -82,7 +81,7 @@ function ViewTasks(props) {
       title: todoItem.title,
       description: todoItem.description,
       status: todoItem.status,
-      due_data: todoItem.due_data,
+      due_date: todoItem.due_date || todoItem.due_data || "",
       todoid: taskId,
       userid: userId,
     });
@@ -91,7 +90,14 @@ function ViewTasks(props) {
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setEditForm({ title: "", description: "", status: "", due_data: "", todoid: null, userid: null });
+    setEditForm({
+      title: "",
+      description: "",
+      status: "",
+      due_date: "",
+      todoid: null,
+      userid: null,
+    });
     setError("");
   };
 
@@ -100,20 +106,20 @@ function ViewTasks(props) {
       setError("Invalid task ID or user ID");
       return;
     }
-    
+
     try {
       const response = await authFetch(
-        `http://localhost:4000/updatetasks/${userid}/${todoid}`,
+        buildApiUrl(`/updatetasks/${userid}/${todoid}`),
         {
           method: "PUT",
-          headers: { 
-            "Content-Type": "application/json"
+          headers: {
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             title: editForm.title,
             description: editForm.description,
             status: editForm.status,
-            due_data: editForm.due_data,
+            due_date: editForm.due_date,
           }),
         },
       );
@@ -127,10 +133,16 @@ function ViewTasks(props) {
 
       console.log("Task updated successfully:", data);
 
-      // Refresh task list
       fetchUserTasks();
       setEditingId(null);
-      setEditForm({ title: "", description: "", status: "", due_data: "", todoid: null, userid: null });
+      setEditForm({
+        title: "",
+        description: "",
+        status: "",
+        due_date: "",
+        todoid: null,
+        userid: null,
+      });
       setError("");
     } catch (error) {
       setError("Update Failed");
@@ -140,15 +152,15 @@ function ViewTasks(props) {
 
   const fetchUserTasks = async () => {
     try {
-      const response = await authFetch(`http://localhost:4000/mytasks`);
+      const response = await authFetch(buildApiUrl("/mytasks"));
       const data = await response.json();
 
       if (response.ok && data.tasks) {
-        // Normalize field names from API
-        const normalizedTasks = data.tasks.map(task => ({
+        const normalizedTasks = data.tasks.map((task) => ({
           ...task,
+          due_date: task.due_date || task.due_data || "",
           todoid: task.todoid || task.id,
-          userid: task.userid || task.user_id
+          userid: task.userid || task.user_id,
         }));
         setUserTasks(normalizedTasks);
         setError("");
@@ -174,110 +186,111 @@ function ViewTasks(props) {
         userTasks.map((todoItem) => {
           const taskId = todoItem.todoid || todoItem.id;
           const userId = todoItem.userid || todoItem.user_id;
-          
+
           return (
-          <div key={taskId || `temp-${Math.random()}`}>
-            {editingId === taskId ? (
-              <div className="border rounded p-13 mb-8">               
-              <h3 className="text-center text-lg mb-5">Edit Task</h3>
-                <form className="flex flex-col gap-4">
-                  <input
-                    type="text"
-                    value={editForm.title}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, title: e.target.value })
-                    }
-                    placeholder="Title"
-                    className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, description: e.target.value })
-                    }
-                    placeholder="Description"
-                    className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <select
-                    value={editForm.status}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, status: e.target.value })
-                    }
-                    className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Status</option>
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={editForm.due_data}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, due_data: e.target.value })
-                    }
-                    className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleUpdate(editForm.todoid, editForm.userid)
+            <div key={taskId || `temp-${Math.random()}`}>
+              {editingId === taskId ? (
+                <div className="border rounded p-13 mb-8">
+                  <h3 className="text-center text-lg mb-5">Edit Task</h3>
+                  <form className="flex flex-col gap-4">
+                    <input
+                      type="text"
+                      value={editForm.title}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, title: e.target.value })
                       }
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex-1"
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition flex-1"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>     
-            ) : (
-              <div className="sm:border border-gray-300 rounded sm:p-4 bg-white sm:mb-4 border sm:w-xl  p-4 mb-4 w-90 m-auto">
-                <h3 className="text-base font-semibold text-gray-900 mb-2">
-                  {todoItem.title}
-                </h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  {todoItem.description}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todoItem.status)}`}
-                    >
-                      {todoItem.status}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {todoItem.due_data}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(todoItem)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDelete(taskId, userId)
+                      placeholder="Title"
+                      className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <textarea
+                      value={editForm.description}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          description: e.target.value,
+                        })
                       }
-                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm"
+                      placeholder="Description"
+                      className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      value={editForm.status}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, status: e.target.value })
+                      }
+                      className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      Delete
-                    </button>
+                      <option value="">Select Status</option>
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                    <input
+                      type="date"
+                      value={editForm.due_date}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, due_date: e.target.value })
+                      }
+                      className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdate(editForm.todoid, editForm.userid)
+                        }
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex-1"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition flex-1"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="sm:border border-gray-300 rounded sm:p-4 bg-white sm:mb-4 border sm:w-xl  p-4 mb-4 w-90 m-auto">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">
+                    {todoItem.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {todoItem.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(todoItem.status)}`}
+                      >
+                        {todoItem.status}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {todoItem.due_date}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(todoItem)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(taskId, userId)}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        );
+              )}
+            </div>
+          );
         })
       )}
     </div>
